@@ -11,4 +11,7 @@ existing itineraries. ``git checkout naive`` is a simpler reference
 implementation which *does* search exhaustively; compare outputs of both to
 verify that nothing went horribly wrong.
 
+To test the difference in performance between the two versions, generate a
+larger dataset (e.g. 10,000 times larger) with ``more_data.py data.csv 10000``.
+
 Developed on **Python 3.5.2**.
