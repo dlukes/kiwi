@@ -24,9 +24,10 @@ def main():
                 continue
             prev = itin[i - 1]
             diff = flight["departure"] - prev["arrival"]
-            assert prev["destination"] == flight["source"]
-            assert diff >= MINT
-            assert diff <= MAXT
+            assert prev["destination"] == flight["source"], \
+                print("prev_destination = {!r}, flight_source = {!r}".format(
+                    prev["destination"], flight["source"]))
+            assert MINT <= diff <= MAXT, print("diff = {!r}".format(diff))
     print("All itineraries are valid.")
 
 

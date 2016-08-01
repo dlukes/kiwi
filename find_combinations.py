@@ -25,22 +25,20 @@ def parse_dates(flight):
 def jsonify(x):
     if isinstance(x, dt):
         return dt.strftime(x, DFMT)
-    elif isinstance(x, SortedListWithKey):
-        return list(x)
     else:
         raise RuntimeError("Unable to jsonify {!r}.".format(x))
 
 
-def is_abab(itin, record):
-    """Will appending ``record`` to ``itin`` result in (A->B), (_->_), (A->B)?
+def is_abab(itin, flight):
+    """Will appending ``flight`` to ``itin`` result in (A->B), (_->_), (A->B)?
 
     """
     itin = itin["itin"]
     if len(itin) < 2:
         return False
     penult = itin[-2]
-    return (penult["source"] == record["source"]
-            and penult["destination"] == record["destination"])
+    return (penult["source"] == flight["source"]
+            and penult["destination"] == flight["destination"])
 
 
 def find_itins(flights, mint, maxt, cleanup_cycles=False):
@@ -76,8 +74,8 @@ def find_itins(flights, mint, maxt, cleanup_cycles=False):
                     itin["maximal"] = False
     if cleanup_cycles:
         for dst in by_dst.values():
-            for record in dst:
-                del record["ends"]
+            for flight in dst:
+                del flight["ends"]
     return itins
 
 
