@@ -10,3 +10,5 @@ candidates each time a new flight is considered as a possible extension to
 existing itineraries. ``git checkout naive`` is a simpler reference
 implementation which *does* search exhaustively; compare outputs of both to
 verify that nothing went horribly wrong.
+
+Developed on **Python 3.5.2**.
