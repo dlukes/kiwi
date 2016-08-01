@@ -7,8 +7,6 @@ import argparse as ap
 import fileinput as finp
 
 from datetime import timedelta, datetime as dt
-from collections import defaultdict
-from sortedcontainers import SortedListWithKey
 from operator import itemgetter
 
 DFMT = "%Y-%m-%dT%H:%M:%S"
@@ -51,8 +49,8 @@ def find_itins(flights, mint, maxt, cleanup_cycles=False):
         output).
 
     """
-    by_dst = defaultdict(lambda: SortedListWithKey(key=lambda flight: flight["arrival"]))
     itins = []
+    earlier_flights = []
     # sorting the flights by arrival times simplifies subsequent code quite a
     # bit because itineraries can then only grow by appending new flights, and
     # never by prepending
@@ -61,11 +59,12 @@ def find_itins(flights, mint, maxt, cleanup_cycles=False):
         itin = dict(itin=[flight], valid=False, maximal=True)
         flight["ends"] = [itin]
         itins.append(itin)
-        by_dst[flight["destination"]].append(flight)
-        rdep = flight["departure"]
-        # this is *not* brute force search, the only candidates we throw away
-        # are those that would result in an (A->B), (B->A), (A->B) itinerary
-        for arrival in by_dst[flight["source"]].irange_key(rdep - maxt, rdep - mint):
+        earlier_flights.append(flight)
+        rsrc, rdep = flight["source"], flight["departure"]
+        for arrival in earlier_flights:
+            diff = rdep - arrival["arrival"]
+            if not (arrival["destination"] == rsrc and MINT <= diff <= MAXT):
+                continue
             for itin in arrival["ends"]:
                 if not is_abab(itin, flight):
                     new = dict(itin=itin["itin"][:] + [flight], valid=True, maximal=True)
@@ -73,9 +72,8 @@ def find_itins(flights, mint, maxt, cleanup_cycles=False):
                     flight["ends"].append(new)
                     itin["maximal"] = False
     if cleanup_cycles:
-        for dst in by_dst.values():
-            for flight in dst:
-                del flight["ends"]
+        for flight in earlier_flights:
+            del flight["ends"]
     return itins
 
 
