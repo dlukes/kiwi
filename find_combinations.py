@@ -16,10 +16,10 @@ MINT = timedelta(hours=1)
 MAXT = timedelta(hours=4)
 
 
-def parse_dates(record):
+def parse_dates(flight):
     for key in ("departure", "arrival"):
-        record[key] = dt.strptime(record[key], DFMT)
-    return record
+        flight[key] = dt.strptime(flight[key], DFMT)
+    return flight
 
 
 def jsonify(x):
@@ -53,13 +53,12 @@ def find_itins(flights, mint, maxt, cleanup_cycles=False):
         output).
 
     """
-    # sorting the records simplifies subsequent code quite a bit because
-    # itineraries can then only grow by appending new flights, and never by
-    # prepending
-    flights = sorted(flights, key=itemgetter("arrival"))
     by_dst = defaultdict(lambda: SortedListWithKey(key=lambda flight: flight["arrival"]))
     itins = []
-    for flight in flights:
+    # sorting the flights by arrival times simplifies subsequent code quite a
+    # bit because itineraries can then only grow by appending new flights, and
+    # never by prepending
+    for flight in sorted(flights, key=itemgetter("arrival")):
         parse_dates(flight)
         itin = dict(itin=[flight], valid=False, maximal=True)
         flight["ends"] = [itin]
